@@ -2,7 +2,6 @@
 ' The .NET Foundation licenses this file to you under the MIT license.
 ' See the LICENSE file in the project root for more information.
 
-Imports System
 Imports System.IO
 Imports System.Security
 
@@ -26,8 +25,8 @@ Namespace Microsoft.VisualBasic.CompilerServices
             MyBase.New()
         End Sub
 
-        Friend Sub New(ByVal FileName As String, ByVal share As OpenShare, ByVal fAppend As Boolean)
-            MyBase.New(FileName, OpenAccess.Write, share, -1)
+        Friend Sub New(fileName As String, share As OpenShare, fAppend As Boolean)
+            MyBase.New(fileName, OpenAccess.Write, share, -1)
             m_fAppend = fAppend
         End Sub
 
@@ -38,13 +37,9 @@ Namespace Microsoft.VisualBasic.CompilerServices
             'MyBase.OpenFile()
 
             Try
-                If m_fAppend Then
-                    'consider checking WRITE if cannot open READWRITE
-                    If File.Exists(m_sFullPath) Then
-                        m_file = New FileStream(m_sFullPath, FileMode.Open, CType(m_access, FileAccess), CType(m_share, FileShare))
-                    Else
-                        m_file = New FileStream(m_sFullPath, FileMode.Create, CType(m_access, FileAccess), CType(m_share, FileShare))
-                    End If
+                'consider checking WRITE if cannot open READWRITE
+                If m_fAppend AndAlso File.Exists(m_sFullPath) Then
+                    m_file = New FileStream(m_sFullPath, FileMode.Open, CType(m_access, FileAccess), CType(m_share, FileShare))
                 Else
                     m_file = New FileStream(m_sFullPath, FileMode.Create, CType(m_access, FileAccess), CType(m_share, FileShare))
                 End If
@@ -71,27 +66,25 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Sub
 
-        Friend Overrides Sub WriteLine(ByVal s As String)
+        Friend Overrides Sub WriteLine(s As String)
             If s Is Nothing Then
                 m_sw.WriteLine()
                 m_position += 2
             Else
-                If m_bPrint AndAlso (m_lWidth <> 0) Then
-                    If m_lCurrentColumn >= m_lWidth Then
-                        m_sw.WriteLine()
-                        m_position += 2
-                    End If
+                If m_bPrint AndAlso (m_lWidth <> 0) AndAlso (m_lCurrentColumn >= m_lWidth) Then
+                    m_sw.WriteLine()
+                    m_position += 2
                 End If
 
                 m_sw.WriteLine(s)
-                Diagnostics.Debug.Assert(Not m_Encoding Is Nothing)
+                Diagnostics.Debug.Assert(m_Encoding IsNot Nothing)
                 m_position += m_Encoding.GetByteCount(s) + 2
             End If
 
             m_lCurrentColumn = 0
         End Sub
 
-        Friend Overrides Sub WriteString(ByVal s As String)
+        Friend Overrides Sub WriteString(s As String)
             If (s Is Nothing) OrElse (s.Length = 0) Then
                 Exit Sub
             End If
@@ -106,7 +99,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
 
             m_sw.Write(s)
-            Diagnostics.Debug.Assert(Not m_Encoding Is Nothing)
+            Diagnostics.Debug.Assert(m_Encoding IsNot Nothing)
             Dim ByteLength As Integer = m_Encoding.GetByteCount(s)
             m_position += ByteLength
             m_lCurrentColumn += s.Length
