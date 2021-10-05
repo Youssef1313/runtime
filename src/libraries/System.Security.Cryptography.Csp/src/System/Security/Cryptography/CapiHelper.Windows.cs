@@ -20,7 +20,7 @@ namespace Internal.NativeCrypto
     /// </summary>
     internal static partial class CapiHelper
     {
-        private static ReadOnlySpan<byte> RgbPubKey => new byte[]
+        private static ReadOnlySpan<byte> RgbPubKey { get; } = new byte[]
         {
                 0x06, 0x02, 0x00, 0x00, 0x00, 0xa4, 0x00, 0x00,
                 0x52, 0x53, 0x41, 0x31, 0x00, 0x02, 0x00, 0x00,
